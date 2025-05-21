@@ -1,34 +1,58 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
-const navigation = [
-  { name: 'Home', href: '/' },
-  { name: 'Student', href: '/student' },
-  { name: 'Teacher', href: '/teacher' },
-];
+const Navbar = ({ user, setUser }: { user: any; setUser: any }) => {
+  // Debug log to check the user object
+  console.log("Navbar user:", user);
+  
+  // Simple check for admin role
+  const isAdmin = user && user.role === 'admin';
+  
+  console.log("Is admin:", isAdmin); // Debug log
 
-const Navbar = () => {
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    navigate('/login');
+  };
+
   return (
     <nav className="text-white flex justify-between p-4 px-20 bg-[#B3C8CF]">
-      <div>
-        My Logo
-      </div>
-      <div className="flex space-x-4 ">
-        {navigation.map((item, index) => {
-          return (
-            <a key={index} href={item.href}>{item.name}</a>
-          )
-        })}
+      <div>My Logo</div>
 
-      <button onClick={() => { navigate('/SignUpForm') }} className="bg-[#F2F2F2] text-black px-4  rounded">
-        SignUp
-      </button>
-      <button onClick={() => { navigate('/SignUpForm') }} className="bg-[#d62323] text-white px-4  rounded">
-        Login
-      </button>
+      <div className="flex space-x-4">
+        {isAdmin ? (
+          <>
+            <Link to="/teacher" className="hover:underline">Teacher</Link>
+            <button
+              onClick={handleLogout}
+              className="bg-[#d62323] text-white px-4 rounded"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/" className="hover:underline">Home</Link>
+            <Link to="/student" className="hover:underline">Student</Link>
+            <button
+              onClick={() => navigate('/SignUpForm')}
+              className="bg-[#F2F2F2] text-black px-4 rounded"
+            >
+              SignUp
+            </button>
+            <button
+              onClick={() => navigate('/Login')}
+              className="bg-[#d62323] text-white px-4 rounded"
+            >
+              Login
+            </button>
+          </>
+        )}
       </div>
     </nav>
-  )
+  );
 };
 
 export default Navbar;
