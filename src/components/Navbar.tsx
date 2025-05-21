@@ -1,13 +1,13 @@
 import { useNavigate, Link } from "react-router-dom";
 
 const Navbar = ({ user, setUser }: { user: any; setUser: any }) => {
-  // Debug log to check the user object
+
   console.log("Navbar user:", user);
-  
-  // Simple check for admin role
+
+
   const isAdmin = user && user.role === 'admin';
-  
-  console.log("Is admin:", isAdmin); // Debug log
+
+  console.log("Is admin:", isAdmin);
 
   const navigate = useNavigate();
 
