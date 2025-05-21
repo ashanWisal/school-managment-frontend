@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     createColumnHelper,
     flexRender,
@@ -7,56 +7,78 @@ import {
     useReactTable,
 
 } from '@tanstack/react-table';
+import { deleteTeacherApi, getAllTeachers } from '../api/teacherApi/TeacherApi';
 
 
 type Person = {
-    id: number;
-    firstName: string;
-    lastName: string;
-    age: number;
+    _id: number;
+    name: string;
+    email: string;
+    subject: string
     // status: string;
 };
 
 
-const defaultData: Person[] = [
-    { id: 1, firstName: 'John', lastName: 'Doe', age: 25 },
-    { id: 2, firstName: 'Jane', lastName: 'Smith', age: 32 },
-    { id: 3, firstName: 'Bob', lastName: 'Johnson', age: 45 },
-    { id: 4, firstName: 'Sarah', lastName: 'Williams', age: 29 },
-    { id: 5, firstName: 'Michael', lastName: 'Brown', age: 38 },
-    { id: 6, firstName: 'Emily', lastName: 'Davis', age: 27 },
-    { id: 7, firstName: 'David', lastName: 'Miller', age: 41 },
-    { id: 8, firstName: 'Jessica', lastName: 'Wilson', age: 33 },
-    { id: 9, firstName: 'Kevin', lastName: 'Moore', age: 36 },
-    { id: 10, firstName: 'Amanda', lastName: 'Taylor', age: 30 },
-    { id: 11, firstName: 'Thomas', lastName: 'Anderson', age: 44 },
-    { id: 12, firstName: 'Lisa', lastName: 'Thomas', age: 31 },
-];
+// const defaultData: Person[] = [
+//     { id: 1, name: 'John Doe', email: 'john@example.com', subject: 'Math' },
+//     { id: 2, name: 'Jane Smith', email: 'jane@example.com', subject: 'Science' },
+//     { id: 3, name: 'Bob Johnson', email: 'bob@example.com', subject: 'English' },
+//     { id: 4, name: 'Sarah Williams', email: 'sarah@example.com', subject: 'History' },
+//     { id: 5, name: 'Michael Brown', email: 'michael@example.com', subject: 'Biology' },
+//     { id: 6, name: 'Emily Davis', email: 'emily@example.com', subject: 'Physics' },
+//     { id: 7, name: 'David Miller', email: 'david@example.com', subject: 'Chemistry' },
+//     { id: 8, name: 'Jessica Wilson', email: 'jessica@example.com', subject: 'Art' },
+//     { id: 9, name: 'Kevin Moore', email: 'kevin@example.com', subject: 'Music' },
+//     { id: 10, name: 'Amanda Taylor', email: 'amanda@example.com', subject: 'Geography' },
+//     { id: 11, name: 'Thomas Anderson', email: 'thomas@example.com', subject: 'Economics' },
+//     { id: 12, name: 'Lisa Thomas', email: 'lisa@example.com', subject: 'Computer Science' },
+// ];
 
 
 const columnHelper = createColumnHelper<Person>();
-
 const TeacherTable = () => {
+    const [data, setData] = useState<Person[]>([]);
 
-    const [data, setData] = useState<Person[]>(defaultData);
+    
 
+useEffect(()=>{
+    const fetchData = async () =>{
+        try {
+            const response = await getAllTeachers()
+            setData(response)
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
 
+    fetchData()
+},[])
 
+const handleDelete = async (_id: number) =>{
+    if(!_id){
+        console.warn('No ID provided for deletion');
+        return
+    }
+    try {
+       const responseDelete =  await deleteTeacherApi(_id.toString())
+       console.log('deleted item', responseDelete)
+        setData(prevData => prevData.filter(person=> person._id !== _id))
+    } catch (error:any) {
+        console.error('Error deleting data:', error);
+    }
+   }
     const columns = [
-        columnHelper.accessor('id', {
-            header: 'ID',
+
+        columnHelper.accessor('name', {
+            header: 'Name',
             cell: info => info.getValue(),
         }),
-        columnHelper.accessor('firstName', {
-            header: 'First Name',
+        columnHelper.accessor('email', {
+            header: 'Email',
             cell: info => info.getValue(),
         }),
-        columnHelper.accessor('lastName', {
-            header: 'Last Name',
-            cell: info => info.getValue(),
-        }),
-        columnHelper.accessor('age', {
-            header: 'Age',
+        columnHelper.accessor('subject', {
+            header: 'Subject',
             cell: info => info.getValue(),
         }),
 
@@ -64,7 +86,8 @@ const TeacherTable = () => {
             id: 'actions',
             header: 'Actions',
             cell: props => {
-                const personId = props.row.original.id;
+                const personId = props.row.original._id;
+
                 return (
                     <div className='flex gap-2'>
                         <button
@@ -74,7 +97,7 @@ const TeacherTable = () => {
                             Delete
                         </button>
                         <button
-                            onClick={() => handleDelete(personId)}
+                            // onClick={() => handleDelete(personId)}
                             className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                         >
                             Edit
@@ -104,14 +127,12 @@ const TeacherTable = () => {
 
 
 
-    const handleDelete = (id: number) => {
-        setData(prevData => prevData.filter(person => person.id !== id));
-    };
+   
 
 
-    const handleReset = () => {
-        setData(defaultData);
-    };
+    // const handleReset = () => {
+    //     setData(defaultData);
+    // };
 
 
 
@@ -123,14 +144,14 @@ const TeacherTable = () => {
 
             <div className="mb-4 flex gap-2">
                 <button
-                    onClick={() => setData(defaultData)}
+                    // onClick={() => setData(defaultData)}
                     className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
                 >
                     All
                 </button>
 
                 <button
-                    onClick={handleReset}
+                    // onClick={handleReset}
                     className="px-3 py-1 bg-yellow-100 rounded hover:bg-yellow-200 ml-auto"
                 >
                     Reset Data
